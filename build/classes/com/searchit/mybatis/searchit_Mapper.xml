@@ -1,0 +1,88 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.searchit.mybatis.SearchItMyInterface">
+    
+    <resultMap id="services"  type="com.searchit.Vos.Services">
+         <result property="service_provider_id"   				   column="service_provider_id" />
+         <result property="service_provider_name"                  column="service_provider_name" />
+         <result property="insert_date" 				           column="insert_date" />
+         <result property="update_date" 			               column="update_date" />
+         <result property="is_active" 				               column="is_active" />
+         <result property="flag" 				  				   column="flag" />
+    </resultMap>
+    
+    
+   <select id="getServices"  resultMap="services" >
+       SELECT service_provider_id,service_provider_name,insert_date,update_date,is_active,flag 
+       FROM services
+       WHERE is_active=1
+   </select> <!-- getting list of services -->
+   
+   
+  
+   
+   <resultMap id="provides"  type="com.searchit.Vos.ProviderDetails">
+         <result property="provider_id"   				         column="provider_id" />
+         <result property="service_provider_id"                  column="service_provider_id" />
+         <result property="provider_name" 				         column="provider_name" />
+         <result property="provider_mail_id" 			         column="provider_mail_id" />
+         <result property="provider_number" 				     column="provider_number" />
+         <result property="provider_address" 				     column="provider_address" />
+         <result property="provider_password" 				     column="provider_password" />
+         <result property="provider_district" 				     column="provider_district" />
+         <result property="provider_area" 				         column="provider_area" />
+         <result property="provider_pincode" 				     column="provider_pincode" />
+         <result property="is_active" 				             column="is_active" />
+         <result property="insert_date" 				         column="insert_date" />
+         <result property="update_date" 			             column="update_date" />
+         <result property="flag" 				  				 column="flag" />
+    </resultMap>
+   
+   <select id="getProdviderDetails" resultMap="provides"  parameterType="java.util.Map">
+      SELECT pd.provider_id, pd.user_detail_id, pd.service_provider_id, pd.provider_address, pd.provider_area, pd.provider_district, pd.provider_pincode, pd.is_active, pd.insert_date, pd.update_date, pd.flag,ud.user_detail_id, ud.user_name, ud.user_phone_no, ud.user_email, ud.is_service_provider
+	  FROM provider_details as pd,user_details as ud WHERE pd.user_detail_id=ud.user_detail_id and pd.service_provider_id=#{service_provider_id} and is_active=1
+   </select>
+   
+   <select id="UserLogin" resultType="com.searchit.Vos.ProviderDetails"  parameterType="java.util.Map" >
+       SELECT user_detail_id, user_name, user_phone_no, user_email, user_password, is_service_provider, date_inserted, date_updated
+        FROM user_details 
+        WHERE user_email=#{user_email} and user_password=#{user_password}
+    </select>
+   
+   <select id="getStates" resultType="com.searchit.Vos.States">
+       SELECT state_id, state_name,is_active,insert_date,update_date FROM states WHERE  is_active=1
+   </select>
+   
+   <select id="getDistricts" resultType="com.searchit.Vos.Districts" parameterType="java.util.Map" >
+     SELECT st.state_id,st.is_active,ds.district_id,ds.district_name FROM states as st,districts as ds
+	 WHERE st.state_id=ds.state_id and st.state_name=#{state_name}
+   </select>
+   
+   <insert id="AddProviderDetails" parameterType="com.searchit.Vos.ProviderDetails" >
+      INSERT INTO provider_details(user_detail_id,service_provider_id, provider_address, provider_area, provider_district, provider_pincode, is_active, insert_date, update_date, flag)
+	  VALUES (#{user_detail_id},#{service_provider_id},#{provider_address},#{provider_area},#{provider_district},#{provider_pincode},0,now(),now(),0)
+   </insert>
+   
+   <select id="CheckUser" parameterType="com.searchit.Vos.ProviderDetails" resultType="com.searchit.Vos.ProviderDetails" >
+       SELECT count(*) as flag
+       FROM user_details WHERE user_email=#{user_email}
+   </select>
+    
+   <resultMap id="userdetails"  type="com.searchit.Vos.ProviderDetails">
+         <result property="user_detail_id"   				       column="user_detail_id" />
+         <result property="user_name"                  			   column="user_name" />
+         <result property="user_phone_no" 				           column="user_phone_no" />
+         <result property="user_email" 			               	   column="user_email" />
+         <result property="is_service_provider" 				   column="is_service_provider" />
+         <result property="date_inserted" 				           column="date_inserted" />
+         <result property="date_updated" 				           column="date_updated" />
+  </resultMap>
+   
+   <insert id="AdduserDetails" parameterType="com.searchit.Vos.ProviderDetails" useGeneratedKeys="true" keyProperty="user_detail_id" keyColumn="user_detail_id" >
+       INSERT INTO user_details(user_name, user_phone_no, user_email,user_password,is_service_provider, date_inserted, date_updated) VALUES 
+       	(#{user_name},#{user_phone_no},#{user_email},#{user_password},#{is_service_provider},now(),now())
+   </insert>
+  
+  
+</mapper>
